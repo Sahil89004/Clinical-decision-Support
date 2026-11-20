@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Watch, HeartPulse, Activity, Wifi, WifiOff } from 'lucide-react';
 import clsx from 'clsx';
+import { API_URL } from '../api';
 
 const gadgets = [
     {
@@ -69,13 +70,15 @@ export default function DeviceConnector({ patientId }) {
                 const isSpike = Math.random() > 0.95;
                 const finalHr = isSpike ? hrValue + 40 : hrValue;
 
-                await axios.post('http://localhost:5000/api/ingest', {
+                await axios.post(`${API_URL}/api/ingest`, {
                     patient_id: patientId,
                     device_id: gadget.id,
                     vital_type: 'heart_rate',
                     value: finalHr,
                     unit: 'bpm',
                     timestamp
+                }, {
+                    headers: { 'x-device-key': import.meta.env.VITE_DEVICE_API_KEY }
                 });
             }
 
@@ -87,13 +90,15 @@ export default function DeviceConnector({ patientId }) {
                 const isDip = Math.random() > 0.95;
                 const finalSpo2 = isDip ? spo2Value - 10 : spo2Value;
 
-                await axios.post('http://localhost:5000/api/ingest', {
+                await axios.post(`${API_URL}/api/ingest`, {
                     patient_id: patientId,
                     device_id: gadget.id,
                     vital_type: 'spo2',
                     value: finalSpo2,
                     unit: '%',
                     timestamp
+                }, {
+                    headers: { 'x-device-key': import.meta.env.VITE_DEVICE_API_KEY }
                 });
             }
         } catch (error) {

@@ -19,10 +19,9 @@ A web-based medical monitoring demo for viewing patient information, tracking vi
 medical-monitoring-platform/
   client/   React, Vite, and Tailwind frontend
   server/   Express, Socket.IO, and SQLite backend
-sk-hospital/ Separate Express/MongoDB Google OAuth prototype
 ```
 
-The instructions below run the main application in `medical-monitoring-platform`. The `sk-hospital` folder is a separate prototype and is not required.
+The application code is in `medical-monitoring-platform`.
 
 ## Requirements
 
@@ -34,21 +33,18 @@ The instructions below run the main application in `medical-monitoring-platform`
 
 Open two terminals from the repository root.
 
-### 1. Configure Google OAuth
+### 1. Configure environment variables
 
-Create `medical-monitoring-platform/server/.env`:
+Copy the example files:
 
-```env
-PORT=5000
-GOOGLE_CLIENT_ID=your_google_client_id
-GOOGLE_CLIENT_SECRET=your_google_client_secret
+```powershell
+Copy-Item medical-monitoring-platform\server\.env.example medical-monitoring-platform\server\.env
+Copy-Item medical-monitoring-platform\client\.env.example medical-monitoring-platform\client\.env
 ```
 
-Create `medical-monitoring-platform/client/.env`:
+Fill in the blank values. Generate a unique `SESSION_SECRET` and `DEVICE_API_KEY`; set both demo passwords to private values at least 8 characters long. Set the same device key in the server's `DEVICE_API_KEY` and the client's `VITE_DEVICE_API_KEY`.
 
-```env
-VITE_GOOGLE_CLIENT_ID=your_google_client_id
-```
+Set `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET` in the server file and the matching `VITE_GOOGLE_CLIENT_ID` in the client file. `VITE_API_URL` may be left blank for local development; it defaults to `http://localhost:5000`.
 
 In the Google Cloud OAuth client settings, allow this authorized JavaScript origin:
 
@@ -63,6 +59,7 @@ http://localhost:5000/auth/google/callback
 ```
 
 Keep the real `.env` files private; they are excluded from Git.
+The `VITE_DEVICE_API_KEY` is included in browser code and is not a secret for production deployments. For production, send device traffic through a trusted server-side service instead of exposing a shared key in the browser.
 
 ### 2. Start the backend
 
@@ -73,6 +70,7 @@ npm run dev
 ```
 
 The API and Socket.IO server run at `http://localhost:5000`. On first startup, the server initializes the SQLite schema and sample records.
+The demo accounts use `doctor@medical.org` for the doctor portal and `john@patient.org` or `jane@patient.org` for the patient portal. Use the corresponding demo passwords from the server `.env` file.
 
 ### 3. Start the frontend
 
@@ -109,7 +107,3 @@ Run these from the appropriate `client` or `server` directory:
 | `client` | `npm run preview` | Preview a production build |
 | `server` | `npm run dev` | Start the backend with nodemon |
 | `server` | `npm start` | Start the backend |
-
-## Separate `sk-hospital` prototype
-
-`sk-hospital` is an independent Express/Passport application that uses MongoDB. It has its own dependencies and configuration and also defaults to port `5000`, so do not run it at the same time as the main application's backend unless you configure a different port.

@@ -4,6 +4,7 @@ import { socket } from '../socket';
 import { Link } from 'react-router-dom';
 import { Heart, Activity, AlertTriangle, CalendarCheck, Clock, Check, RefreshCw } from 'lucide-react';
 import clsx from 'clsx';
+import { API_URL } from '../api';
 
 export default function Dashboard() {
     const [patients, setPatients] = useState([]);
@@ -12,11 +13,11 @@ export default function Dashboard() {
 
     useEffect(() => {
         // Fetch initial data
-        axios.get('http://localhost:5000/api/patients')
+        axios.get(`${API_URL}/api/patients`)
             .then(res => setPatients(res.data))
             .catch(err => console.error(err));
 
-        axios.get('http://localhost:5000/api/appointments')
+        axios.get(`${API_URL}/api/appointments`)
             .then(res => setAppointments(res.data.appointments || []))
             .catch(err => console.error(err));
 
@@ -41,7 +42,7 @@ export default function Dashboard() {
 
     const handleConfirmAppointment = async (id) => {
         try {
-            await axios.put(`http://localhost:5000/api/appointments/${id}`, { status: 'Confirmed' });
+            await axios.put(`${API_URL}/api/appointments/${id}`, { status: 'Confirmed' });
             setAppointments(prev => prev.map(apt => apt.id === id ? { ...apt, status: 'Confirmed' } : apt));
         } catch (error) {
             console.error('Error confirming appointment:', error);
@@ -53,7 +54,7 @@ export default function Dashboard() {
         if (!newDateStr) return;
         
         try {
-            await axios.put(`http://localhost:5000/api/appointments/${id}`, { status: 'Rescheduled', date: new Date(newDateStr).toISOString() });
+            await axios.put(`${API_URL}/api/appointments/${id}`, { status: 'Rescheduled', date: new Date(newDateStr).toISOString() });
             setAppointments(prev => prev.map(apt => apt.id === id ? { ...apt, status: 'Rescheduled', date: new Date(newDateStr).toISOString() } : apt));
         } catch (error) {
             console.error('Error rescheduling appointment:', error);

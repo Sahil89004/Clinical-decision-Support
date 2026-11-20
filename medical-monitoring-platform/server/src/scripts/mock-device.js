@@ -1,9 +1,14 @@
 const axios = require('axios');
+require('dotenv').config();
 
 const API_URL = 'http://localhost:5000/api/ingest';
 const PATIENTS = [1, 2]; // IDs from seed
 
 console.log("Starting Medical Device Simulation (Ctrl+C to stop)...");
+
+const requestConfig = {
+    headers: { 'x-device-key': process.env.DEVICE_API_KEY }
+};
 
 function generateVital(patientId) {
     const time = Date.now();
@@ -52,7 +57,7 @@ async function sendVitals() {
                     console.log(`[SIM] Triggering TACHYCARDIA for P${pid}`);
                 }
 
-                await axios.post(API_URL, v);
+                await axios.post(API_URL, v, requestConfig);
                 // process.stdout.write('.');
             } catch (err) {
                 console.error(`Error sending data for P${pid}:`, err.message);

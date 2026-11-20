@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
+import { API_URL } from '../api';
 
 export default function Register() {
     const navigate = useNavigate();
@@ -91,7 +92,7 @@ export default function Register() {
         }
 
         try {
-            const response = await fetch('http://localhost:5000/api/register', {
+            const response = await fetch(`${API_URL}/api/register`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({

@@ -3,6 +3,7 @@ import { Outlet, Link, useNavigate } from 'react-router-dom';
 import { Activity, Users, LogOut, FileText, Calendar, Share2, AlertTriangle } from 'lucide-react';
 import { AuthContext } from '../contexts/AuthContext';
 import { socket } from '../socket';
+import { API_URL } from '../api';
 
 export default function Layout() {
     const { user, setUser } = useContext(AuthContext);
@@ -24,7 +25,7 @@ export default function Layout() {
 
     const handleLogout = async () => {
         try {
-            await fetch('http://localhost:5000/api/auth/logout', { method: 'POST', credentials: 'include' });
+            await fetch(`${API_URL}/api/auth/logout`, { method: 'POST', credentials: 'include' });
         } catch (error) {
             console.error('Logout error:', error);
         }

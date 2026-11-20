@@ -1,8 +1,7 @@
 import { io } from 'socket.io-client';
+import { API_URL } from './api';
 
-// Connect to backend (default localhost:5000)
-const URL = 'http://localhost:5000';
-
-export const socket = io(URL, {
-    autoConnect: true
+export const socket = io(API_URL, {
+    autoConnect: false,
+    withCredentials: true
 });

@@ -1,6 +1,7 @@
 import React, { useState, useContext } from 'react';
 import { AuthContext } from '../contexts/AuthContext';
 import { useNavigate, Link } from 'react-router-dom';
+import { API_URL } from '../api';
 
 export default function Login() {
     const { setUser } = useContext(AuthContext);
@@ -19,7 +20,7 @@ export default function Login() {
         
         // Handle Google logic specially
         if (role === 'google') {
-            window.location.href = 'http://localhost:5000/auth/google';
+            window.location.href = `${API_URL}/auth/google`;
             return;
         }
 
@@ -29,8 +30,9 @@ export default function Login() {
         }
 
         try {
-            const response = await fetch('http://localhost:5000/api/login', {
+            const response = await fetch(`${API_URL}/api/login`, {
                 method: 'POST',
+                credentials: 'include',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     username: credentials.username,
@@ -47,7 +49,6 @@ export default function Login() {
             }
 
             // Success
-            alert(`Login successful! Welcome ${data.user.username}`);
             setUser({ 
                 name: data.user.username, 
                 role: data.user.role,

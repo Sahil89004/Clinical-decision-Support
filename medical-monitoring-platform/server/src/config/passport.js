@@ -27,8 +27,8 @@ passport.use(
                  const patientId = this.lastID;
                  
                  // Insert into users
-                 db.run('INSERT INTO users (username, email, password_hash, role) VALUES (?, ?, ?, ?)', 
-                 [displayName, email, 'google_oauth_no_pass', 'patient'], function(err) {
+                 db.run('INSERT INTO users (username, email, password_hash, role, phone) VALUES (?, ?, ?, ?, ?)',
+                 [displayName, email, 'google_oauth_no_pass', 'patient', ''], function(err) {
                      if (err) return done(err);
                      
                      const newUser = {
@@ -36,6 +36,7 @@ passport.use(
                          username: displayName,
                          email: email,
                          role: 'patient',
+                         phone: '',
                          patient_id: patientId
                      };
                      return done(null, newUser);
@@ -60,14 +61,33 @@ passport.deserializeUser((id, done) => {
       if (!user) return done(null, false);
       
       if (user.role === 'patient') {
-          // fetch patient_id
-          db.get('SELECT id FROM patients WHERE name = ? OR primary_caregiver_phone = ?', [user.username, user.phone], (err, patient) => {
-             if (patient) user.patient_id = patient.id;
-             done(null, user);
-          });
-      } else {
-          done(null, user);
+          const findByName = () => db.get(
+              'SELECT id FROM patients WHERE name = ? ORDER BY id LIMIT 1',
+              [user.username],
+              (patientErr, patient) => {
+                  if (patientErr) return done(patientErr);
+                  if (patient) user.patient_id = patient.id;
+                  done(null, user);
+              }
+          );
+
+          if (!user.phone) return findByName();
+
+          return db.get(
+              'SELECT id FROM patients WHERE primary_caregiver_phone = ? ORDER BY id LIMIT 1',
+              [user.phone],
+              (patientErr, patient) => {
+                  if (patientErr) return done(patientErr);
+                  if (patient) {
+                      user.patient_id = patient.id;
+                      return done(null, user);
+                  }
+                  findByName();
+              }
+          );
       }
+
+      done(null, user);
   });
 });
 

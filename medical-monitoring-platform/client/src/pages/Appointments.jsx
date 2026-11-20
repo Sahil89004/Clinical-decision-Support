@@ -3,6 +3,7 @@ import { useParams, Link } from 'react-router-dom';
 import axios from 'axios';
 import { AuthContext } from '../contexts/AuthContext';
 import { ArrowLeft, Calendar, Clock, MapPin, Video, X, Clock3, CheckCircle2 } from 'lucide-react';
+import { API_URL } from '../api';
 
 export default function Appointments() {
     const { id } = useParams();
@@ -15,7 +16,7 @@ export default function Appointments() {
     useEffect(() => {
         const fetchAppointments = async () => {
             try {
-                const response = await axios.get(`http://localhost:5000/api/appointments?patient_id=${id}`);
+                const response = await axios.get(`${API_URL}/api/appointments?patient_id=${id}`);
                 setUpcomingAppointments(response.data.appointments || []);
             } catch (error) {
                 console.error('Error fetching appointments:', error);
@@ -73,7 +74,7 @@ export default function Appointments() {
         };
 
         try {
-            const response = await axios.post('http://localhost:5000/api/appointments', newAptData);
+            const response = await axios.post(`${API_URL}/api/appointments`, newAptData);
             if (response.data.success) {
                 const confirmedApt = {
                     ...newAptData,

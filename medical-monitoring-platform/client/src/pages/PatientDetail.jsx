@@ -6,6 +6,7 @@ import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContai
 import { ArrowLeft, Bell, AlertTriangle, Info, ShieldAlert } from 'lucide-react';
 import { AuthContext } from '../contexts/AuthContext';
 import ChatWidget from '../components/ChatWidget';
+import { API_URL } from '../api';
 
 export default function PatientDetail() {
     const { id } = useParams();
@@ -27,7 +28,7 @@ export default function PatientDetail() {
         }
 
         // Fetch Patient Info
-        axios.get('http://localhost:5000/api/patients')
+        axios.get(`${API_URL}/api/patients`)
             .then(res => {
                 const found = res.data.find(p => p.id === patientId);
                 if (found) setPatient(found);
@@ -42,12 +43,12 @@ export default function PatientDetail() {
             });
 
         // Fetch History
-        axios.get(`http://localhost:5000/api/patients/${patientId}/vitals?limit=50`)
+        axios.get(`${API_URL}/api/patients/${patientId}/vitals?limit=50`)
             .then(res => setHistory(res.data.reverse()))
             .catch(err => console.error(err));
             
         // Fetch Alerts
-        axios.get(`http://localhost:5000/api/patients/${patientId}/alerts?limit=10`)
+        axios.get(`${API_URL}/api/patients/${patientId}/alerts?limit=10`)
             .then(res => setAlerts(res.data))
             .catch(err => console.error(err));
 
@@ -243,7 +244,7 @@ export default function PatientDetail() {
                         <ChatWidget 
                             patientId={patient.id} 
                             currentRole={user?.role} 
-                            currentUserId={user?.role === 'doctor' ? user.username : patient.name} 
+                            currentUserId={user?.id}
                             inline={true}
                         />
                     </div>

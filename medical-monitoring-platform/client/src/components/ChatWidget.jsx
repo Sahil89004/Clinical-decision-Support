@@ -3,6 +3,7 @@ import axios from 'axios';
 import { socket } from '../socket';
 import { Send, UserCircle, MessageSquare, Paperclip, FileText } from 'lucide-react';
 import clsx from 'clsx';
+import { API_URL } from '../api';
 
 export default function ChatWidget({ patientId, currentRole, currentUserId, inline = false }) {
     const [messages, setMessages] = useState([]);
@@ -27,7 +28,7 @@ export default function ChatWidget({ patientId, currentRole, currentUserId, inli
     useEffect(() => {
         if (!isExpanded) return;
 
-        axios.get(`http://localhost:5000/api/messages/${patientId}`)
+        axios.get(`${API_URL}/api/messages/${patientId}`)
             .then(res => {
                 setMessages(res.data.messages || []);
                 scrollToBottom();
@@ -35,7 +36,7 @@ export default function ChatWidget({ patientId, currentRole, currentUserId, inli
             .catch(err => console.error('Error fetching chat history:', err));
 
         if (currentRole === 'patient') {
-            axios.get('http://localhost:5000/api/doctors')
+            axios.get(`${API_URL}/api/doctors`)
                 .then(res => setDoctors(res.data.doctors || []))
                 .catch(err => console.error('Error fetching doctors:', err));
         }
@@ -76,7 +77,7 @@ export default function ChatWidget({ patientId, currentRole, currentUserId, inli
             scrollToBottom();
 
             try {
-                const res = await axios.post('http://localhost:5000/api/ai/chat', { message: msgContent });
+                const res = await axios.post(`${API_URL}/api/ai/chat`, { message: msgContent });
                 const aiMsg = {
                     id: Date.now() + 1,
                     patient_id: patientId,
@@ -93,8 +94,6 @@ export default function ChatWidget({ patientId, currentRole, currentUserId, inli
         } else {
             const payload = {
                 patient_id: patientId,
-                sender_role: currentRole, 
-                sender_id: currentUserId,
                 content: msgContent
             };
             socket.emit('send_message', payload);
@@ -115,17 +114,15 @@ export default function ChatWidget({ patientId, currentRole, currentUserId, inli
         formData.append('file', file);
 
         try {
-            const res = await axios.post('http://localhost:5000/api/upload', formData, {
+            const res = await axios.post(`${API_URL}/api/upload`, formData, {
                 headers: { 'Content-Type': 'multipart/form-data' }
             });
 
             if (res.data.success) {
                 const payload = {
                     patient_id: patientId,
-                    sender_role: currentRole,
-                    sender_id: currentUserId,
                     content: `📎 Shared a file: ${file.name}`,
-                    attachment_url: res.data.fileUrl,
+                    attachment_url: new URL(res.data.fileUrl, API_URL).toString(),
                     attachment_type: res.data.fileType
                 };
                 socket.emit('send_message', payload);
@@ -268,7 +265,8 @@ export default function ChatWidget({ patientId, currentRole, currentUserId, inli
                             </div>
                         ) : (
                             messages.map(msg => {
-                                const isMe = msg.sender_role === currentRole && msg.sender_id === currentUserId;
+                                const isMe = msg.sender_role === currentRole &&
+                                    String(msg.sender_id) === String(currentUserId);
                                 
                                 let bubbleColor = "bg-white border text-slate-800 rounded-tl-sm";
                                 let iconBubble = <div className="w-8 h-8 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center font-bold text-xs" title="Patient">PT</div>;
@@ -327,7 +325,7 @@ export default function ChatWidget({ patientId, currentRole, currentUserId, inli
                                 ref={fileInputRef} 
                                 className="hidden" 
                                 onChange={handleFileUpload}
-                                accept="image/*,.pdf,.doc,.docx"
+                                accept="image/jpeg,image/png,image/gif,image/webp,application/pdf"
                             />
                             <button 
                                 type="button"

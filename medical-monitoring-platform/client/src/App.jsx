@@ -9,6 +9,8 @@ import MedicalHistory from './pages/MedicalHistory';
 import Appointments from './pages/Appointments';
 import SharedRecords from './pages/SharedRecords';
 import Layout from './components/Layout';
+import { API_URL } from './api';
+import { socket } from './socket';
 
 import { AuthContext } from './contexts/AuthContext';
 function App() {
@@ -16,7 +18,7 @@ function App() {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    fetch('http://localhost:5000/api/auth/me', { credentials: 'include' })
+    fetch(`${API_URL}/api/auth/me`, { credentials: 'include' })
       .then(res => res.json())
       .then(data => {
         if (data.success && data.user) {
@@ -26,6 +28,14 @@ function App() {
       .catch(err => console.error("Session fetch error", err))
       .finally(() => setIsLoading(false));
   }, []);
+
+  useEffect(() => {
+    if (user) {
+      socket.connect();
+    } else {
+      socket.disconnect();
+    }
+  }, [user]);
 
   if (isLoading) {
     return <div className="flex items-center justify-center min-h-screen bg-slate-50"><div className="w-10 h-10 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin"></div></div>;
